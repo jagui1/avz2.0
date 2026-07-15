@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { HelloService } from './hello.service';
+import { HelloService } from './services/hello.service';
 
 @Component({
   selector: 'app-root',

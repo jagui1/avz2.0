@@ -1,25 +1,49 @@
-# AVZ 2.0
+# AVZ 2.0 — Ants vs Zombies (Web Rewrite)
 
-Remaster of a college game, built as fullstack practice with an Angular frontend and Spring Boot backend.
+Full-stack remaster of a college Java game: **Angular** frontend, **Spring Boot** backend, **SQLite** persistence (wired; game save/load in Phase 2), REST + WebSocket (planned). Backend is authoritative for game rules; the client renders state and sends commands.
+
+## Status
+
+**Phase 1 complete** (foundation). See [specifications/TODO.md](specifications/TODO.md) for the 5-phase plan.
+
+| Phase | Focus | Status |
+|-------|--------|--------|
+| 1 | Rules extraction, package layout, domain model | Done |
+| 2 | Game engine, SQLite save/load, REST game APIs | Next |
+| 3 | Angular board / HUD | Pending |
+| 4 | STOMP WebSockets | Pending |
+| 5 | Tests + Docker Compose MVP | Pending |
+
+Temporary smoke endpoint: `GET /api/hello` (removed when game APIs land in Phase 2).
+
+## Specs
+
+| Doc | Purpose |
+|-----|---------|
+| [specifications/PRD.md](specifications/PRD.md) | Product requirements / MVP acceptance |
+| [specifications/TECH.md](specifications/TECH.md) | Staged technical build (0–11) |
+| [specifications/TODO.md](specifications/TODO.md) | 5-phase checklist (source of truth for progress) |
+| [specifications/RULES.md](specifications/RULES.md) | Numbers extracted from original Java game |
+| [specifications/MAPPING.md](specifications/MAPPING.md) | Old classes → new packages |
+
+**Design note:** The original game is turn-based queue combat, not grid TD. Combat/entity stats come from source; board size, tick rate, movement, and player life are documented gaps (`TODO(needs-source-value)`).
 
 ## Prerequisites
 
 - **Node.js 20+** and npm
 - **Angular CLI 19** (`npm install -g @angular/cli@19`) — use 19 on Node 20; CLI 22+ needs Node 22+
 - **Java 21** (Spring Boot 4 requires 17+)
-- **Maven** (or use the included `backend/mvnw` wrapper)
+- **Maven** (or use `backend/mvnw`)
 
-If Java/Maven were installed under `~/jdks` and `~/tools` (when Homebrew isn’t available):
+If Java/Maven live under `~/jdks` and `~/tools`:
 
 ```bash
 source ~/jdks/env.sh
 ```
 
-Verify:
-
 ```bash
 java -version   # 21.x
-mvn -v          # or use ./mvnw from backend/
+./mvnw -v       # from backend/
 ng version      # 19.x
 ```
 
@@ -27,41 +51,47 @@ ng version      # 19.x
 
 ```text
 avz2.0/
-  frontend/   # Angular (ng serve → http://localhost:4200)
-  backend/    # Spring Boot (port 8080)
+  frontend/                 # Angular (:4200)
+    src/app/
+      game/board|entities|hud
+      services/ models/ core/
+  backend/                  # Spring Boot (:8080)
+    src/main/java/com/game/
+      controller/ service/ engine/ model/
+      repository/ dto/ websocket/
+  database/                 # SQLite file at runtime (avz.db)
+  specifications/           # PRD, TECH, TODO, RULES, MAPPING
 ```
 
-## Run the backend
+## Run locally (Phase 1 smoke)
 
 ```bash
-cd backend
-./mvnw spring-boot:run
+# Terminal 1 — backend
+source ~/jdks/env.sh   # if needed
+cd backend && ./mvnw spring-boot:run
+
+# Terminal 2 — frontend
+cd frontend && npm start
 ```
 
-Smoke test:
+- API: `curl http://localhost:8080/api/hello`
+- UI: http://localhost:4200
+
+### Backend tests
 
 ```bash
-curl http://localhost:8080/api/hello
-# {"message":"Hello from AVZ"}
+cd backend && ./mvnw test
 ```
 
-## Run the frontend
+## API (current)
 
-In a second terminal:
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/api/hello` | Temporary connectivity check |
 
-```bash
-cd frontend
-npm start
-# or: ng serve
-```
+CORS allows `http://localhost:4200` in local dev.
 
-Open [http://localhost:4200](http://localhost:4200). You should see the message from Spring Boot.
+## Docs for demos / interviews
 
-## API
-
-| Method | Path | Response |
-|--------|------|----------|
-| GET | `/api/hello` | `{ "message": "Hello from AVZ" }` |
-
-CORS allows `http://localhost:4200` during local development.
-
+- [DEMO.md](DEMO.md) — live walkthrough script
+- [INTERVIEW_NOTES.md](INTERVIEW_NOTES.md) — talking points
